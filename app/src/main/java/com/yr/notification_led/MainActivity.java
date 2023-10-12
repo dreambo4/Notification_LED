@@ -1,6 +1,7 @@
 package com.yr.notification_led;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -8,13 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     EditText r, g, b;
     SeekBar sbr, sbg, sbb;
     TextView tvr, tvg, tvb;
-    int count = 0;
     int color = 0;
     int red = 0, green = 0, blue = 0;
     String content = "";
@@ -48,17 +48,12 @@ public class MainActivity extends AppCompatActivity {
         tvg = (TextView) findViewById(R.id.textView5);
         tvb = (TextView) findViewById(R.id.textView6);
 
-        btn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                content = (r.getText().toString() + g.getText().toString() + b.getText().toString()).toUpperCase();
-                color = Integer.decode("0x" + content);
-                //Log.v("bbb",r.getText().toString()+g.getText().toString()+b.getText().toString()+" color:"+color);
-                count = 3;
-                aHandler = new Handler();
-                aHandler.post(runnable);
-            }
-
+        btn1.setOnClickListener(v -> {
+            content = (r.getText().toString() + g.getText().toString() + b.getText().toString()).toUpperCase();
+            color = Integer.decode("0x" + content);
+            //Log.v("bbb",r.getText().toString()+g.getText().toString()+b.getText().toString()+" color:"+color);
+            aHandler = new Handler();
+            aHandler.postDelayed(runnable, 1000 * 3);
         });
 
         sbr.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -118,19 +113,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                content = toHex(red) + toHex(green) + toHex(blue);
-                color = Integer.decode("0x" + content);
-                //Log.v("aaa",toHex(red)+""+toHex(green)+""+toHex(blue)+" color:"+color);
+        btn2.setOnClickListener(v -> {
+            content = toHex(red) + toHex(green) + toHex(blue);
+            color = Integer.decode("0x" + content);
+            //Log.v("aaa",toHex(red)+""+toHex(green)+""+toHex(blue)+" color:"+color);
 
-                count = 3;
-                aHandler = new Handler();
-                aHandler.post(runnable);
+            aHandler = new Handler();
+            aHandler.postDelayed(runnable, 1000 * 3);
 
-
-            }
 
         });
 
@@ -159,40 +149,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    final Runnable runnable = new Runnable() {
-        public void run() {
-            // TODO Auto-generated method stub
+    final Runnable runnable = () -> {
+        // Creates an explicit intent for an Activity in your app
+        final Intent resultIntent = new Intent(MainActivity.this, Main2Activity.class);
+        final TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
+        stackBuilder.addParentStack(Main2Activity.class);
+        stackBuilder.addNextIntent(resultIntent);
 
-            if (count > 0) {
-                count--;
-                aHandler.postDelayed(runnable, 1000);
-            } else {
-                // Creates an explicit intent for an Activity in your app
-                final Intent resultIntent = new Intent(MainActivity.this, Main2Activity.class);
-                final TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
-                stackBuilder.addParentStack(Main2Activity.class);
-                stackBuilder.addNextIntent(resultIntent);
+        NotificationCompat.Builder mBuilder = execution();
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, flags);
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        int mId = 0;
+        mNotificationManager.notify(mId, mBuilder.build());
 
-                NotificationCompat.Builder mBuilder = excution();
-                int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, flags);
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                // mId allows you to update the notification later on.
-                int mId = 0;
-                mNotificationManager.notify(mId, mBuilder.build());
-
-                //seekbar歸零
-                /*sbr.setProgress(0);
-                sbg.setProgress(0);
-                sbb.setProgress(0);*/
-            }
-        }
+        //seekbar歸零
+//        sbr.setProgress(0);
+//        sbg.setProgress(0);
+//        sbb.setProgress(0);
     };
 
-    protected NotificationCompat.Builder excution() {
+    protected NotificationCompat.Builder execution() {
+        String channelId = "led";
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(MainActivity.this)
+                new NotificationCompat.Builder(MainActivity.this, channelId)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("LED Color")
                         .setContentText("#" + content)

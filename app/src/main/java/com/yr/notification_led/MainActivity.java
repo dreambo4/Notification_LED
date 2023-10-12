@@ -176,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
                 stackBuilder.addNextIntent(resultIntent);
 
                 NotificationCompat.Builder mBuilder = excution();
-                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, flags);
                 mBuilder.setContentIntent(resultPendingIntent);
                 NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 // mId allows you to update the notification later on.

@@ -1,12 +1,12 @@
 package com.yr.notification_led;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
@@ -18,170 +18,106 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Button btn1, btn2;
-    Handler aHandler;
-    EditText r, g, b;
+    Button btn1, btn2;
     SeekBar sbr, sbg, sbb;
-    TextView tvr, tvg, tvb;
-    int color = 0;
-    int red = 0, green = 0, blue = 0;
-    String content = "";
+    NotificationCompat.Builder mBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btn1 = (Button) findViewById(R.id.btn1);
-        btn2 = (Button) findViewById(R.id.btn2);
+        btn1 = findViewById(R.id.btn1);
+        btn2 = findViewById(R.id.btn2);
 
-        r = (EditText) findViewById(R.id.editText);
-        g = (EditText) findViewById(R.id.editText2);
-        b = (EditText) findViewById(R.id.editText3);
+        sbr = findViewById(R.id.seekBar);
+        sbg = findViewById(R.id.seekBar2);
+        sbb = findViewById(R.id.seekBar3);
 
-        sbr = (SeekBar) findViewById(R.id.seekBar);
-        sbg = (SeekBar) findViewById(R.id.seekBar2);
-        sbb = (SeekBar) findViewById(R.id.seekBar3);
+        EditText r = findViewById(R.id.editText);
+        EditText g = findViewById(R.id.editText2);
+        EditText b = findViewById(R.id.editText3);
 
-        tvr = (TextView) findViewById(R.id.textView4);
-        tvg = (TextView) findViewById(R.id.textView5);
-        tvb = (TextView) findViewById(R.id.textView6);
+        TextView tvr = findViewById(R.id.textView4);
+        TextView tvg = findViewById(R.id.textView5);
+        TextView tvb = findViewById(R.id.textView6);
 
         btn1.setOnClickListener(v -> {
-            content = (r.getText().toString() + g.getText().toString() + b.getText().toString()).toUpperCase();
-            color = Integer.decode("0x" + content);
-            //Log.v("bbb",r.getText().toString()+g.getText().toString()+b.getText().toString()+" color:"+color);
-            aHandler = new Handler();
-            aHandler.postDelayed(runnable, 1000 * 3);
-        });
-
-        sbr.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //SeekBar改變時做的動作
-                tvr.setText("R : " + progress);
-                red = progress;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //開始拉動SeekBar時做的動作
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //拉動SeekBar停止時做的動作
-            }
-        });
-
-        sbg.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //SeekBar改變時做的動作
-                tvg.setText("G : " + progress);
-                green = progress;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //開始拉動SeekBar時做的動作
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //拉動SeekBar停止時做的動作
-            }
-        });
-
-        sbb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //SeekBar改變時做的動作
-                tvb.setText("B : " + progress);
-                blue = progress;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //開始拉動SeekBar時做的動作
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //拉動SeekBar停止時做的動作
-            }
+            String content = (r.getText().toString() + g.getText().toString() + b.getText().toString()).toUpperCase();
+            showNotificationDelayed(content, 1000 * 3);
         });
 
         btn2.setOnClickListener(v -> {
-            content = toHex(red) + toHex(green) + toHex(blue);
-            color = Integer.decode("0x" + content);
-            //Log.v("aaa",toHex(red)+""+toHex(green)+""+toHex(blue)+" color:"+color);
-
-            aHandler = new Handler();
-            aHandler.postDelayed(runnable, 1000 * 3);
-
-
+            String content = toHex(sbr.getProgress()) + toHex(sbg.getProgress()) + toHex(sbb.getProgress());
+            showNotificationDelayed(content, 1000 * 3);
         });
 
+        sbr.setOnSeekBarChangeListener(new ColorSeekBarListener(sbr, tvr));
+        sbg.setOnSeekBarChangeListener(new ColorSeekBarListener(sbg, tvg));
+        sbb.setOnSeekBarChangeListener(new ColorSeekBarListener(sbb, tvb));
+    }
+
+    private void changeBtnColor() {
+        String hexStringColor = toHex(sbr.getProgress()) + toHex(sbg.getProgress()) + toHex(sbb.getProgress());
+        btn2.setBackgroundColor(Color.parseColor("#" + hexStringColor));
+    }
+
+    private void showNotificationDelayed(String colorHexString, long delayMillis) {
+        Intent notifyIntent = new Intent(this, MainActivity.class);
+        notifyIntent.setAction(Intent.ACTION_MAIN);
+        notifyIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                this, 0, notifyIntent, flags);
+
+        mBuilder = buildNotification(colorHexString);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        Handler aHandler = new Handler();
+        aHandler.postDelayed(runnable, delayMillis);
     }
 
     static String toHex(int num) {
         int n = num;
         String[] arr = {"A", "B", "C", "D", "E", "F"};
-        String hex = "";
+        StringBuilder hex = new StringBuilder();
         while (n > 0) {
             int a = n % 16;
             if (a < 10) {
-                hex = a + hex;
+                hex.insert(0, a);
             } else {
-                hex = arr[a % 10] + hex;
-                //Log.v("ccc",arr[a%10]);
+                hex.insert(0, arr[a % 10]);
+//                Log.v("ccc", arr[a % 10]);
             }
             n /= 16;
         }
 
         while (hex.length() <= 1) {
-            hex = "0" + hex;
+            hex.insert(0, "0");
         }
 
-        return num == 0 ? "00" : hex;
+        return num == 0 ? "00" : hex.toString();
     }
 
-
     final Runnable runnable = () -> {
-        // Creates an explicit intent for an Activity in your app
-        final Intent resultIntent = new Intent(MainActivity.this, Main2Activity.class);
-        final TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
-        stackBuilder.addParentStack(Main2Activity.class);
-        stackBuilder.addNextIntent(resultIntent);
-
-        NotificationCompat.Builder mBuilder = execution();
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, flags);
-        mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
         int mId = 0;
         mNotificationManager.notify(mId, mBuilder.build());
-
-        //seekbar歸零
-//        sbr.setProgress(0);
-//        sbg.setProgress(0);
-//        sbb.setProgress(0);
     };
 
-    protected NotificationCompat.Builder execution() {
+    protected NotificationCompat.Builder buildNotification(String colorHexString) {
+        int color = Integer.decode("0x" + colorHexString);
+//        Log.v("aaa", toHex(red) + "" + toHex(green) + "" + toHex(blue) + " color:" + color);
+
         String channelId = "led";
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(MainActivity.this, channelId)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("LED Color")
-                        .setContentText("#" + content)
+                        .setContentText("#" + colorHexString)
                         .setLights(color, 1000, 300)
                         .setColor(color);
-        //.setVibrate(Notification.DEFAULT_VIBRATE)
-        //.setSound(Notification.DEFAULT_SOUND);
         // 準備設定通知效果用的變數
         int defaults = 0;
         defaults |= Notification.DEFAULT_VIBRATE;
@@ -189,5 +125,53 @@ public class MainActivity extends AppCompatActivity {
         //defaults |= Notification.DEFAULT_LIGHTS;
         mBuilder.setDefaults(defaults);
         return mBuilder;
+    }
+
+    class ColorSeekBarListener implements SeekBar.OnSeekBarChangeListener {
+        private final SeekBar seekBar;
+        private final TextView textView;
+
+        public ColorSeekBarListener(SeekBar seekBar, TextView textView) {
+            this.seekBar = seekBar;
+            this.textView = textView;
+        }
+
+        /** SeekBar改變時做的動作 */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            updateUI(progress);
+            changeBtnColor();
+        }
+
+        /** 開始拉動 SeekBar 時做的動作 */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        /** 拉動 SeekBar 停止時做的動作 */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+        }
+
+        private void updateUI(int progress) {
+            String label;
+            String colorCode;
+
+            if (seekBar == sbr) {
+                label = "R : ";
+                colorCode = "#" + toHex(progress) + "0000";
+            } else if (seekBar == sbg) {
+                label = "G : ";
+                colorCode = "#00" + toHex(progress) + "00";
+            } else {
+                label = "B : ";
+                colorCode = "#0000" + toHex(progress);
+            }
+
+            textView.setText(label + progress);
+            ColorStateList colorStateList = ColorStateList.valueOf(Color.parseColor(colorCode));
+            textView.setTextColor(colorStateList);
+            seekBar.setProgressTintList(colorStateList);
+        }
     }
 }

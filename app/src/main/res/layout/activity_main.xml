@@ -105,7 +105,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
-            android:progress="0" />
+            android:progress="0"
+            android:thumbTint="#FF0000" />
 
         <TextView
             android:id="@+id/textView5"
@@ -119,7 +120,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
-            android:progress="0" />
+            android:progress="0"
+            android:thumbTint="#00FF00" />
 
         <TextView
             android:id="@+id/textView6"
@@ -133,7 +135,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
-            android:progress="0" />
+            android:progress="0"
+            android:thumbTint="#0000FF" />
 
         <Button
             android:id="@+id/btn2"

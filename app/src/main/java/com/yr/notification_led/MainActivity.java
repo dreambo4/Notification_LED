@@ -1,10 +1,12 @@
 package com.yr.notification_led;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,13 +16,20 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
     Button btn1, btn2;
     SeekBar sbr, sbg, sbb;
     NotificationCompat.Builder mBuilder;
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +64,20 @@ public class MainActivity extends AppCompatActivity {
         sbr.setOnSeekBarChangeListener(new ColorSeekBarListener(sbr, tvr));
         sbg.setOnSeekBarChangeListener(new ColorSeekBarListener(sbg, tvg));
         sbb.setOnSeekBarChangeListener(new ColorSeekBarListener(sbb, tvb));
+
+        if (!checkPermission()) {
+            requestPermission();
+        }
+    }
+
+    /** 檢查是否有推播權限 */
+    private boolean checkPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** 請求推播權限 */
+    private void requestPermission() {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
     }
 
     private void changeBtnColor() {

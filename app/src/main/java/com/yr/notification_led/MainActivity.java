@@ -82,7 +82,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void changeBtnColor() {
         String hexStringColor = toHex(sbr.getProgress()) + toHex(sbg.getProgress()) + toHex(sbb.getProgress());
-        btn2.setBackgroundColor(Color.parseColor("#" + hexStringColor));
+        int bgColor = Color.parseColor("#" + hexStringColor);
+        btn2.setBackgroundColor(bgColor);
+        btn2.setTextColor(isColorDark(bgColor) ? Color.WHITE : Color.BLACK);
+    }
+
+    /**
+     * 檢測顏色亮度的函數
+     * <p>
+     * 公式由ChatGPT提供，來自於色彩理論中的亮度計算方法，這些權重是基於人眼對不同顏色的敏感度而來的。
+     */
+    public static boolean isColorDark(int color) {
+        double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
+        return darkness >= 0.5;
     }
 
     private void showNotificationDelayed(String colorHexString, long delayMillis) {

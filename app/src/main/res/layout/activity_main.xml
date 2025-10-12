@@ -24,14 +24,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/tvTextTitleRed"
                 android:layout_width="37dp"
                 android:layout_height="wrap_content"
                 android:text="R : "
                 android:textSize="20dp" />
 
             <EditText
-                android:id="@+id/editText"
+                android:id="@+id/etRed"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -46,14 +46,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/tvTextTitleGreen"
                 android:layout_width="37dp"
                 android:layout_height="wrap_content"
                 android:text="G : "
                 android:textSize="20dp" />
 
             <EditText
-                android:id="@+id/editText2"
+                android:id="@+id/etGreen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -68,14 +68,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/tvTextTitleBlue"
                 android:layout_width="37dp"
                 android:layout_height="wrap_content"
                 android:text="B : "
                 android:textSize="20dp" />
 
             <EditText
-                android:id="@+id/editText3"
+                android:id="@+id/etBlue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -85,7 +85,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn1"
+            android:id="@+id/btnTextNotification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -94,14 +94,14 @@
 
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/tvSeekBarTitleRed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="R : 0"
             android:textSize="20dp" />
 
         <SeekBar
-            android:id="@+id/seekBar"
+            android:id="@+id/sbRed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
@@ -109,14 +109,14 @@
             android:thumbTint="#FF0000" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/tvSeekBarTitleGreen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="G : 0"
             android:textSize="20dp" />
 
         <SeekBar
-            android:id="@+id/seekBar2"
+            android:id="@+id/sbGreen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
@@ -124,14 +124,14 @@
             android:thumbTint="#00FF00" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/tvSeekBarTitleBlue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="B : 0"
             android:textSize="20dp" />
 
         <SeekBar
-            android:id="@+id/seekBar3"
+            android:id="@+id/sbBlue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="255"
@@ -139,7 +139,7 @@
             android:thumbTint="#0000FF" />
 
         <Button
-            android:id="@+id/btn2"
+            android:id="@+id/btnSeekbarNotification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="通知" />

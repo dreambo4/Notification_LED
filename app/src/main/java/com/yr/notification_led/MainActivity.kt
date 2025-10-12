@@ -11,8 +11,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
-import android.widget.Button
-import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
@@ -20,14 +18,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.yr.notification_led.databinding.ActivityMainBinding
 
 open class MainActivity : AppCompatActivity() {
-    private lateinit var btn1: Button
-    private lateinit var btn2: Button
-
-    lateinit var sbr: SeekBar
-    lateinit var sbg: SeekBar
-    lateinit var sbb: SeekBar
+    private lateinit var binding: ActivityMainBinding
 
     private lateinit var mBuilder: NotificationCompat.Builder
 
@@ -36,37 +30,29 @@ open class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btn1 = findViewById(R.id.btn1)
-        btn2 = findViewById(R.id.btn2)
+        binding.apply {
+            btnTextNotification.setOnClickListener {
+                val rContent = etRed.text.toString()
+                val gContent = etGreen.text.toString()
+                val bContent = etBlue.text.toString()
 
-        sbr = findViewById(R.id.seekBar)
-        sbg = findViewById(R.id.seekBar2)
-        sbb = findViewById(R.id.seekBar3)
+                val content = (rContent + gContent + bContent).uppercase()
+                showNotificationDelayed(content, 1000 * 3)
+            }
 
-        val r = findViewById<EditText>(R.id.editText)
-        val g = findViewById<EditText>(R.id.editText2)
-        val b = findViewById<EditText>(R.id.editText3)
+            btnSeekbarNotification.setOnClickListener {
+                val content =
+                    toHex(sbRed.progress) + toHex(sbGreen.progress) + toHex(sbBlue.progress)
+                showNotificationDelayed(content, 1000 * 3)
+            }
 
-        val tvr = findViewById<TextView>(R.id.textView4)
-        val tvg = findViewById<TextView>(R.id.textView5)
-        val tvb = findViewById<TextView>(R.id.textView6)
-
-        btn1.setOnClickListener {
-            val content = (r.getText().toString() + g.getText().toString() + b.getText()
-                .toString()).uppercase()
-            showNotificationDelayed(content, 1000 * 3)
+            sbRed.setOnSeekBarChangeListener(ColorSeekBarListener(sbRed, tvSeekBarTitleRed))
+            sbGreen.setOnSeekBarChangeListener(ColorSeekBarListener(sbGreen, tvSeekBarTitleGreen))
+            sbBlue.setOnSeekBarChangeListener(ColorSeekBarListener(sbBlue, tvSeekBarTitleBlue))
         }
-
-        btn2.setOnClickListener {
-            val content = toHex(sbr.progress) + toHex(sbg.progress) + toHex(sbb.progress)
-            showNotificationDelayed(content, 1000 * 3)
-        }
-
-        sbr.setOnSeekBarChangeListener(ColorSeekBarListener(sbr, tvr))
-        sbg.setOnSeekBarChangeListener(ColorSeekBarListener(sbg, tvg))
-        sbb.setOnSeekBarChangeListener(ColorSeekBarListener(sbb, tvb))
 
         if (checkPermission().not()) {
             requestPermission()
@@ -87,10 +73,16 @@ open class MainActivity : AppCompatActivity() {
     }
 
     fun changeBtnColor() {
-        val hexStringColor = toHex(sbr.progress) + toHex(sbg.progress) + toHex(sbb.progress)
-        val bgColor = Color.parseColor("#$hexStringColor")
-        btn2.setBackgroundColor(bgColor)
-        btn2.setTextColor(if (isColorDark(bgColor)) Color.WHITE else Color.BLACK)
+        binding.apply {
+            val hexStringColor =
+                toHex(sbRed.progress) + toHex(sbGreen.progress) + toHex(sbBlue.progress)
+            val bgColor = Color.parseColor("#$hexStringColor")
+
+            btnSeekbarNotification.apply {
+                setBackgroundColor(bgColor)
+                setTextColor(if (isColorDark(bgColor)) Color.WHITE else Color.BLACK)
+            }
+        }
     }
 
     /**
@@ -190,12 +182,12 @@ open class MainActivity : AppCompatActivity() {
             val colorCode: String
 
             when (seekBar) {
-                sbr -> {
+                binding.sbRed -> {
                     label = "R : "
                     colorCode = "#" + toHex(progress) + "0000"
                 }
 
-                sbg -> {
+                binding.sbGreen -> {
                     label = "G : "
                     colorCode = "#00" + toHex(progress) + "00"
                 }

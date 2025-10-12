@@ -1,90 +1,96 @@
-package com.yr.notification_led;
+package com.yr.notification_led
 
-import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.Handler;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Bundle
+import android.os.Handler
+import android.widget.Button
+import android.widget.EditText
+import android.widget.SeekBar
+import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
+open class MainActivity : AppCompatActivity() {
+    private lateinit var btn1: Button
+    private lateinit var btn2: Button
 
-public class MainActivity extends AppCompatActivity {
-    Button btn1, btn2;
-    SeekBar sbr, sbg, sbb;
-    NotificationCompat.Builder mBuilder;
+    lateinit var sbr: SeekBar
+    lateinit var sbg: SeekBar
+    lateinit var sbb: SeekBar
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            });
+    private lateinit var mBuilder: NotificationCompat.Builder
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    private val requestPermissionLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
-        btn1 = findViewById(R.id.btn1);
-        btn2 = findViewById(R.id.btn2);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        sbr = findViewById(R.id.seekBar);
-        sbg = findViewById(R.id.seekBar2);
-        sbb = findViewById(R.id.seekBar3);
+        btn1 = findViewById(R.id.btn1)
+        btn2 = findViewById(R.id.btn2)
 
-        EditText r = findViewById(R.id.editText);
-        EditText g = findViewById(R.id.editText2);
-        EditText b = findViewById(R.id.editText3);
+        sbr = findViewById(R.id.seekBar)
+        sbg = findViewById(R.id.seekBar2)
+        sbb = findViewById(R.id.seekBar3)
 
-        TextView tvr = findViewById(R.id.textView4);
-        TextView tvg = findViewById(R.id.textView5);
-        TextView tvb = findViewById(R.id.textView6);
+        val r = findViewById<EditText>(R.id.editText)
+        val g = findViewById<EditText>(R.id.editText2)
+        val b = findViewById<EditText>(R.id.editText3)
 
-        btn1.setOnClickListener(v -> {
-            String content = (r.getText().toString() + g.getText().toString() + b.getText().toString()).toUpperCase();
-            showNotificationDelayed(content, 1000 * 3);
-        });
+        val tvr = findViewById<TextView>(R.id.textView4)
+        val tvg = findViewById<TextView>(R.id.textView5)
+        val tvb = findViewById<TextView>(R.id.textView6)
 
-        btn2.setOnClickListener(v -> {
-            String content = toHex(sbr.getProgress()) + toHex(sbg.getProgress()) + toHex(sbb.getProgress());
-            showNotificationDelayed(content, 1000 * 3);
-        });
+        btn1.setOnClickListener {
+            val content = (r.getText().toString() + g.getText().toString() + b.getText()
+                .toString()).uppercase()
+            showNotificationDelayed(content, 1000 * 3)
+        }
 
-        sbr.setOnSeekBarChangeListener(new ColorSeekBarListener(sbr, tvr));
-        sbg.setOnSeekBarChangeListener(new ColorSeekBarListener(sbg, tvg));
-        sbb.setOnSeekBarChangeListener(new ColorSeekBarListener(sbb, tvb));
+        btn2.setOnClickListener {
+            val content = toHex(sbr.progress) + toHex(sbg.progress) + toHex(sbb.progress)
+            showNotificationDelayed(content, 1000 * 3)
+        }
 
-        if (!checkPermission()) {
-            requestPermission();
+        sbr.setOnSeekBarChangeListener(ColorSeekBarListener(sbr, tvr))
+        sbg.setOnSeekBarChangeListener(ColorSeekBarListener(sbg, tvg))
+        sbb.setOnSeekBarChangeListener(ColorSeekBarListener(sbb, tvb))
+
+        if (checkPermission().not()) {
+            requestPermission()
         }
     }
 
     /** 檢查是否有推播權限 */
-    private boolean checkPermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+    private fun checkPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     /** 請求推播權限 */
-    private void requestPermission() {
-        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+    private fun requestPermission() {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    private void changeBtnColor() {
-        String hexStringColor = toHex(sbr.getProgress()) + toHex(sbg.getProgress()) + toHex(sbb.getProgress());
-        int bgColor = Color.parseColor("#" + hexStringColor);
-        btn2.setBackgroundColor(bgColor);
-        btn2.setTextColor(isColorDark(bgColor) ? Color.WHITE : Color.BLACK);
+    fun changeBtnColor() {
+        val hexStringColor = toHex(sbr.progress) + toHex(sbg.progress) + toHex(sbb.progress)
+        val bgColor = Color.parseColor("#$hexStringColor")
+        btn2.setBackgroundColor(bgColor)
+        btn2.setTextColor(if (isColorDark(bgColor)) Color.WHITE else Color.BLACK)
     }
 
     /**
@@ -92,121 +98,118 @@ public class MainActivity extends AppCompatActivity {
      * <p>
      * 公式由ChatGPT提供，來自於色彩理論中的亮度計算方法，這些權重是基於人眼對不同顏色的敏感度而來的。
      */
-    public static boolean isColorDark(int color) {
-        double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
-        return darkness >= 0.5;
+    private fun isColorDark(color: Int): Boolean {
+        val darkness: Double =
+            1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+        return darkness >= 0.5
     }
 
-    private void showNotificationDelayed(String colorHexString, long delayMillis) {
-        Intent notifyIntent = new Intent(this, MainActivity.class);
-        notifyIntent.setAction(Intent.ACTION_MAIN);
-        notifyIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(
-                this, 0, notifyIntent, flags);
+    private fun showNotificationDelayed(colorHexString: String, delayMillis: Long) {
+        val notifyIntent = Intent(this, MainActivity::class.java)
+        notifyIntent.setAction(Intent.ACTION_MAIN)
+        notifyIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        val resultPendingIntent = PendingIntent.getActivity(
+            this, 0, notifyIntent, flags
+        )
 
-        mBuilder = buildNotification(colorHexString);
-        mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder = buildNotification(colorHexString)
+        mBuilder.setContentIntent(resultPendingIntent)
 
-        Handler aHandler = new Handler();
-        aHandler.postDelayed(runnable, delayMillis);
+        Handler().postDelayed(runnable, delayMillis)
     }
 
-    static String toHex(int num) {
-        int n = num;
-        String[] arr = {"A", "B", "C", "D", "E", "F"};
-        StringBuilder hex = new StringBuilder();
+    fun toHex(num: Int): String {
+        var n = num
+        val arr = listOf("A", "B", "C", "D", "E", "F")
+        val hex = StringBuilder()
         while (n > 0) {
-            int a = n % 16;
+            val a = n % 16
             if (a < 10) {
-                hex.insert(0, a);
+                hex.insert(0, a)
             } else {
-                hex.insert(0, arr[a % 10]);
-//                Log.v("ccc", arr[a % 10]);
+                hex.insert(0, arr[a % 10])
+//                Log.v("ccc", arr[a % 10])
             }
-            n /= 16;
+            n /= 16
         }
 
-        while (hex.length() <= 1) {
-            hex.insert(0, "0");
+        while (hex.length <= 1) {
+            hex.insert(0, "0")
         }
 
-        return num == 0 ? "00" : hex.toString();
+        return if (num == 0) "00" else hex.toString()
     }
 
-    final Runnable runnable = () -> {
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    private val runnable = Runnable {
+        val mNotificationManager: NotificationManager? =
+            getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         // mId allows you to update the notification later on.
-        int mId = 0;
-        mNotificationManager.notify(mId, mBuilder.build());
-    };
-
-    protected NotificationCompat.Builder buildNotification(String colorHexString) {
-        int color = Integer.decode("0x" + colorHexString);
-//        Log.v("aaa", toHex(red) + "" + toHex(green) + "" + toHex(blue) + " color:" + color);
-
-        String channelId = "led";
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(MainActivity.this, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("LED Color")
-                        .setContentText("#" + colorHexString)
-                        .setLights(color, 1000, 300)
-                        .setColor(color);
-        // 準備設定通知效果用的變數
-        int defaults = 0;
-        defaults |= Notification.DEFAULT_VIBRATE;
-        defaults |= Notification.DEFAULT_SOUND;
-        //defaults |= Notification.DEFAULT_LIGHTS;
-        mBuilder.setDefaults(defaults);
-        return mBuilder;
+        val mId = 0
+        mNotificationManager?.notify(mId, mBuilder.build())
     }
 
-    class ColorSeekBarListener implements SeekBar.OnSeekBarChangeListener {
-        private final SeekBar seekBar;
-        private final TextView textView;
+    private fun buildNotification(colorHexString: String): NotificationCompat.Builder {
+        val color = Integer.decode("0x$colorHexString")
+//        Log.v("aaa", toHex(red) + "" + toHex(green) + "" + toHex(blue) + " color:" + color)
 
-        public ColorSeekBarListener(SeekBar seekBar, TextView textView) {
-            this.seekBar = seekBar;
-            this.textView = textView;
-        }
+        val channelId = "led"
+        val mBuilder =
+            NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("LED Color")
+                .setContentText("#$colorHexString")
+                .setLights(color, 1000, 300)
+                .setColor(color)
+        // 準備設定通知效果用的變數
+        val defaults = Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND
+        //val defaults = Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND or Notification.DEFAULT_LIGHTS
+        mBuilder.setDefaults(defaults)
+        return mBuilder
+    }
+
+    inner class ColorSeekBarListener(private var seekBar: SeekBar, private var textView: TextView) :
+        SeekBar.OnSeekBarChangeListener {
 
         /** SeekBar改變時做的動作 */
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            updateUI(progress);
-            changeBtnColor();
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            updateUI(progress)
+            changeBtnColor()
         }
 
         /** 開始拉動 SeekBar 時做的動作 */
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
+        override fun onStartTrackingTouch(seekBar: SeekBar) {
         }
 
         /** 拉動 SeekBar 停止時做的動作 */
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
+        override fun onStopTrackingTouch(seekBar: SeekBar) {
         }
 
-        private void updateUI(int progress) {
-            String label;
-            String colorCode;
+        private fun updateUI(progress: Int) {
+            val label: String
+            val colorCode: String
 
-            if (seekBar == sbr) {
-                label = "R : ";
-                colorCode = "#" + toHex(progress) + "0000";
-            } else if (seekBar == sbg) {
-                label = "G : ";
-                colorCode = "#00" + toHex(progress) + "00";
-            } else {
-                label = "B : ";
-                colorCode = "#0000" + toHex(progress);
+            when (seekBar) {
+                sbr -> {
+                    label = "R : "
+                    colorCode = "#" + toHex(progress) + "0000"
+                }
+
+                sbg -> {
+                    label = "G : "
+                    colorCode = "#00" + toHex(progress) + "00"
+                }
+
+                else -> {
+                    label = "B : "
+                    colorCode = "#0000" + toHex(progress)
+                }
             }
 
-            textView.setText(label + progress);
-            ColorStateList colorStateList = ColorStateList.valueOf(Color.parseColor(colorCode));
-            textView.setTextColor(colorStateList);
-            seekBar.setProgressTintList(colorStateList);
+            textView.text = label + progress
+            val colorStateList = ColorStateList.valueOf(Color.parseColor(colorCode))
+            textView.setTextColor(colorStateList)
+            seekBar.setProgressTintList(colorStateList)
         }
     }
 }
